@@ -1,0 +1,58 @@
+---
+name: windplant-thesis-topology
+
+hosts:
+  - name: ot-hmi
+    base_box:
+      image: ubuntu-22.04
+      man_user: ubuntu
+    flavor: a2-2-35
+
+  - name: workstation
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: a4-4-35
+
+routers:
+  - name: ot-router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: a1-2-20
+
+  - name: usr-router
+    base_box:
+      image: debian-12-x86_64
+      man_user: debian
+    flavor: a1-2-20
+
+networks:
+  - name: usr
+    cidr: 10.0.10.0/24
+    accessible_by_user: false
+
+  - name: ot
+    cidr: 10.0.20.0/24
+    accessible_by_user: false
+
+net_mappings:
+  - host: ot-hmi
+    network: ot
+    ip: 10.0.20.21
+
+  - host: workstation
+    network: usr
+    ip: 10.0.10.10
+
+router_mappings:
+
+  - router: usr-router
+    network: usr
+    ip: 10.0.10.1
+
+  - router: ot-router
+    network: ot
+    ip: 10.0.20.1
+
+groups: []
