@@ -8,7 +8,7 @@ hosts:
       man_user: ubuntu
     flavor: a2-2-35
 
-  - name: workstation
+  - name: usr-workstation
     base_box:
       image: debian-12-x86_64
       man_user: debian
@@ -41,7 +41,7 @@ net_mappings:
     network: ot
     ip: 10.0.20.21
 
-  - host: workstation
+  - host: usr-workstation
     network: usr
     ip: 10.0.10.10
 

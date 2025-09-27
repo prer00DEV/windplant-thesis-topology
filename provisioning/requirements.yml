@@ -1,3 +1,7 @@
 - name: hmi-role
   src: https://github.com/prer00DEV/thesis-role-hmi.git
   scm: git
+
+- name: workstation-role
+  src: https://github.com/prer00DEV/thesis-role-workstation.git
+  scm: git

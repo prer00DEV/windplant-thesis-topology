@@ -1,9 +1,9 @@
-- name: Setup HMI
-  hosts: ot-hmi
+- name: Setup workstation
+  hosts: usr-workstation
   become: yes
   pre_tasks:
     - name: Update apt
       apt:
         update_cache: true
   roles:
-    - hmi-role
+    - workstation-role
