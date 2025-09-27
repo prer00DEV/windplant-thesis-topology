@@ -1,0 +1,9 @@
+- name: hmi tasks
+  hosts: ot-hmi
+  become: yes
+  pre_tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+  roles:
+    - hmi-role

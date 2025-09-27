@@ -1,0 +1,3 @@
+- name: hmi-role
+  src: https://github.com/prer00DEV/thesis-role-hmi.git
+  scm: git

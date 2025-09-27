@@ -4,7 +4,7 @@ name: windplant-thesis-topology
 hosts:
   - name: ot-hmi
     base_box:
-      image: ubuntu-22.04
+      image: ubuntu-noble-x86_64
       man_user: ubuntu
     flavor: a2-2-35
 
