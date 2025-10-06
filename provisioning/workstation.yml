@@ -1,9 +1,12 @@
 - name: Setup workstation
   hosts: usr-workstation
-  become: yes
-  pre_tasks:
-    - name: Update apt
-      apt:
-        update_cache: true
+  tasks:
+    - name: Get wan and man interface IPs
+      hosts: man
+      tasks:
+        - set_fact:
+            wan_interface_ip: "{{ ansible_interfaces | map('regex_replace', '^', 'ansible_') | map('extract', vars) | selectattr('ipv4.address', 'defined') | selectattr('ipv4.network', 'match', '100\\.100\\.100\\.') | map(attribute='ipv4.address') | first }}"
+
+    - name: Set workstation role with gathered facts
   roles:
     - workstation-role

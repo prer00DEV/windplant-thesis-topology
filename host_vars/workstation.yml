@@ -1,0 +1,2 @@
+revshell_ip: hostvars['workstation_revshell_ip']
+revshell_port: hostvars['workstation_revshell_port']
