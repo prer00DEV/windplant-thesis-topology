@@ -1,0 +1,132 @@
+- name: Update and configure routers
+  hosts: routers
+  become: yes
+  pre_tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+    
+    - name: Install networking tools
+      apt:
+        name: 
+          - iptables-persistent
+          - netfilter-persistent
+          - wireguard
+        state: present 
+
+  tasks:
+    - name: Enable IPv4 forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+  
+- name: Gather facts from all routers
+  hosts: routers
+  become: yes
+  gather_facts: yes
+  
+- name: Configure ot-router
+  hosts: ot-router
+  become: yes
+  tasks:
+    - name: Allow forwarding WireGuard
+      iptables:
+        chain: FORWARD
+        destination: 10.0.20.100
+        protocol: udp
+        destination_port: 51820
+        jump: ACCEPT
+
+    - name: Allow forwarding ICMP
+      iptables:
+        chain: FORWARD
+        destination: 10.0.20.100
+        protocol: icmp
+        jump: ACCEPT
+
+    - name: Allow established connections
+      iptables:
+        chain: FORWARD
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+
+    - name: Save iptables rules
+      command: netfilter-persistent save
+
+    - name: Create persistent route script
+      copy:
+        dest: /usr/local/sbin/static-routes.sh
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          # DYNAMICALLY GENERATED ROUTE
+          # Target: USR Network (10.0.10.0/24)
+          # Gateway: USR-Router WAN IP ({{ hostvars['usr-router']['ansible_ens4']['ipv4']['address'] }})
+          
+          ip route add 10.0.10.0/24 via {{ hostvars['usr-router']['ansible_ens4']['ipv4']['address'] }} || true
+
+    - name: Create Systemd unit for static routes
+      copy:
+        dest: /etc/systemd/system/static-routes.service
+        content: |
+          [Unit]
+          Description=Add Static Routes
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/static-routes.sh
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable static routes service
+      systemd:
+        name: static-routes
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+- name: Configure USR Router
+  hosts: usr-router
+  become: yes
+  tasks:
+    - name: Create persistent route script
+      copy:
+        dest: /usr/local/sbin/static-routes.sh
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          # DYNAMICALLY GENERATED ROUTE
+          # Target: OT Network (10.0.20.0/24)
+          # Gateway: OT-Router WAN IP ({{ hostvars['ot-router']['ansible_ens4']['ipv4']['address'] }})
+          
+          ip route add 10.0.20.0/24 via {{ hostvars['ot-router']['ansible_ens4']['ipv4']['address'] }} || true
+
+    - name: Create Systemd unit for static routes
+      copy:
+        dest: /etc/systemd/system/static-routes.service
+        content: |
+          [Unit]
+          Description=Add Static Routes
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/static-routes.sh
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable static routes service
+      systemd:
+        name: static-routes
+        enabled: yes
+        state: started
+        daemon_reload: yes

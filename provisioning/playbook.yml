@@ -1,4 +1,4 @@
-- import_playbook: router.yml
+- import_playbook: routers.yml
 
 - import_playbook: hmi.yml
 

@@ -30,11 +30,11 @@ routers:
 networks:
   - name: usr
     cidr: 10.0.10.0/24
-    accessible_by_user: false
+    accessible_by_user: true
 
   - name: ot
     cidr: 10.0.20.0/24
-    accessible_by_user: false
+    accessible_by_user: true
 
 net_mappings:
   - host: ot-hmi
@@ -55,4 +55,8 @@ router_mappings:
     network: ot
     ip: 10.0.20.1
 
-groups: []
+groups:
+  - name: routers
+    hosts:
+      - usr-router
+      - ot-router
